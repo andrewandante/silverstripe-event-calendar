@@ -370,11 +370,11 @@ class Calendar extends Page {
 
 				$startdatetime = $this->iCalDateToDateTime($event['DTSTART']);
 
-				if (!empty($this->iCalDateToDateTime($event['DTEND']))) {
+				if (array_key_exists('DTEND', $event) && $event['DTEND'] != NULL) {
 					$enddatetime = $this->iCalDateToDateTime($event['DTEND']);
-				} elseif (!empty($this->iCalDateToDateTime($event['DURATION']))) {
-					$duration = $this->iCalDurationToDateTime($event['DURATION']);
-					$enddatetime = $startdatetime + $duration;
+				} elseif (array_key_exists('DURATION', $event) && $event['DURATION'] != NULL) {
+					$enddatetime = $this->iCalDurationToEndTime($event['DTSTART'], $event['DURATION']);
+				}
 				if ( ($startdatetime->get() < $start->get() && $enddatetime->get() < $start->get())
 					|| $startdatetime->get() > $end->get() && $enddatetime->get() > $end->get()) {
 					// do nothing; dates outside range
@@ -397,14 +397,39 @@ class Calendar extends Page {
 		$date = str_replace('T', '', $date);//remove T
 		$date = str_replace('Z', '', $date);//remove Z
 		$date = strtotime($date);
-        $date = $date + date('Z');
+    $date = $date + date('Z');
 		return sfDate::getInstance($date);
 	}
 
-	public function iCalDurationToDateTime($duration) {
+	public function str_replace_first($search, $replace, $subject) {
+    return implode($replace, explode($search, $subject, 2));
+	}
+
+	public function iCalDurationToEndTime($startTime, $duration) {
+		$durint = 0;
 		$duration = str_replace('P', '', $duration);//remove P
 		$duration = str_replace('T', '', $duration);//remove T
-		return strtotime($duration);
+		if (strpos($duration, 'H') != false) {
+			$hours = strtok($duration, 'H');
+			$durint += (intval($hours) * 3600);
+			$duration = $this->str_replace_first((string)$hours . 'H', '', $duration);
+		}
+		if (strpos($duration, 'M') != false) {
+			$minutes = strtok($duration, 'M');
+			$durint += (intval($minutes) * 60);
+			$duration = $this->str_replace_first((string)$minutes . 'M', '', $duration);
+		}
+		if (strpos($duration, 'S') != false) {
+			$seconds = strtok($duration, 'S');
+			$durint += (intval($seconds));
+			$duration = $this->str_replace_first((string)$seconds . 'S', '', $duration);
+		}
+
+		$startTime = str_replace('T', '', $startTime);//remove T
+		$startTime = str_replace('Z', '', $startTime);//remove Z
+		$endTime = strtotime($startTime) + $durint;
+    $endTime = $endTime + date('Z');
+		return sfDate::getInstance($endTime);
 	}
 
 	public function getAllCalendars() {
