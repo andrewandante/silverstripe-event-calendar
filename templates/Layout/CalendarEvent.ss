@@ -6,10 +6,12 @@ $MonthJumper
 
   <% with CurrentDate %>
   <p class="dates">$DateRange<% if StartTime %> $TimeRange<% end_if %></p>
-  <p><a href="$ICSLink" title="<% _t('CalendarEvent.ADD','Add to Calendar') %>">Add this to Calendar</a></p>
   <% end_with %>
-  
+
+  <div style="float: right"><% include AttendanceList %></div>
+
   $Content
+  $AttendanceForm
   
   <% if OtherDates %>
   <div class="event-calendar-other-dates">
