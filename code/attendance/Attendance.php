@@ -7,12 +7,12 @@ class Attendance extends DataObject {
   public static $default_sort = 'Status';
   
   public static $db = array(
-    'Status' => "Enum('Playing,Absent,Unknown', 'Unknown')",
+    'Status' => "Enum('Playing,Absent,Other,Unknown', 'Unknown')",
     'Notes' => 'Text'
   );
   
   public static $has_one = array(
-    'CalendarEvent' => 'CalendarEvent',
+    'Match' => 'Match',
     'Member' => 'Member'
   );
   
@@ -28,7 +28,7 @@ class Attendance extends DataObject {
       HiddenField::create('MemberID', 'Member', Member::currentUserID()),
       DropdownField::create('Status', 'Status', singleton('Attendance')->dbObject('Status')->enumValues()),
       TextField::create('Notes'),
-      HiddenField::create('CalendarEventID')
+      HiddenField::create('MatchID')
     );
     $this->extend('updateFrontEndFields', $fields);
     return $fields;

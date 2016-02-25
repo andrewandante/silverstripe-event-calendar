@@ -11,12 +11,6 @@ class CalendarAnnouncement extends CalendarDateTime {
 		'Calendar' => 'Calendar'
 	);
 
-	private static $has_many = array(
-		'Attendees' => 'Attendee',
-		'Absentees' => 'Absentee',
-		'Maybes' => 'Maybe'
-	);
-
 	public function getCMSFields() {
 
 		$self = $this;
@@ -25,10 +19,6 @@ class CalendarAnnouncement extends CalendarDateTime {
 
 			$f->insertBefore(new TextField('Title', _t('CalendarAnnouncement.TITLE','Title of announcement')), "StartDate");
 			$f->insertBefore(new TextareaField('Content', _t('CalendarAnnouncement.CONTENT','Announcement content')), "StartDate");
-			//FIX THIS
-			$f->insertBefore($lbf = new ListboxField('Attendees', _t('CalendarAnnouncement.ATTENDEES', 'Attending'), Member::get()->map('ID', 'Title')), "StartDate");
-			$lbf->setMultiple = true;
-
 		});
 
 		$f = parent::getCMSFields();

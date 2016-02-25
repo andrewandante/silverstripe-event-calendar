@@ -1,4 +1,4 @@
-$CalendarWidget
+<!-- $CalendarWidget -->
 $MonthJumper
 <p><a href="$Parent.Link">&laquo; Back to $Parent.Title</a></p>
 <div class="vevent">
@@ -6,8 +6,9 @@ $MonthJumper
 
   <% with CurrentDate %>
   <p class="dates">$DateRange<% if StartTime %> $TimeRange<% end_if %></p>
+  <p class="location">$Up.Location</p>
   <% end_with %>
-
+  
   <div style="float: right"><% include AttendanceList %></div>
 
   $Content

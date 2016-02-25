@@ -34,7 +34,7 @@ class AttendanceExtension extends DataExtension {
         $c = new AttendanceController();
         $form = $c->attendanceform();
         if ($form) {
-            $form->setFormField('CalendarEventID', $this->owner->ID);
+            $form->setFormField('MatchID', $this->owner->ID);
             $form->setFormField('Member', Member::currentUser());
         }
         return $form;

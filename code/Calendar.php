@@ -7,6 +7,7 @@ class Calendar extends Page {
 		'OtherDatesCount' => 'Int',
 		'RSSTitle' => 'Varchar(255)',
 		'DefaultFutureMonths' => 'Int',
+		'DefaultPreviousResults' => 'Int',
 		'EventsPerPage' => 'Int',
 		'DefaultView' => "Enum('today,week,month,weekend,upcoming','upcoming')"
 	);
@@ -32,6 +33,7 @@ class Calendar extends Page {
 		'DefaultDateHeader' => 'Upcoming Events',
 		'OtherDatesCount' => '3',
 		'DefaultFutureMonths' => '6',
+		'DefaultPreviousResults' => '1',
 		'EventsPerPage' => '10',
 		'DefaultView' => 'upcoming'
 	);
@@ -87,6 +89,7 @@ class Calendar extends Page {
 					'weekend' => _t('Calendar.WEEKENDVIEW',"Show this weekend's events.")
 				)),
 				new NumericField('DefaultFutureMonths', _t('Calendar.DEFAULTFUTUREMONTHS','Number maximum number of future months to show in default view')),
+				new NumericField('DefaultPreviousResults', _t('Calendar.DEFAULTPREVIOUSRESULTS','Number maximum number of previous results to show in default view')),
 				new NumericField('EventsPerPage', _t('Calendar.EVENTSPERPAGE','Events per page')),
 				new TextField('DefaultDateHeader', _t('Calendar.DEFAULTDATEHEADER','Default date header (displays when no date range has been selected)')),
 				new NumericField('OtherDatesCount', _t('Calendar.NUMBERFUTUREDATES','Number of future dates to show for repeating events'))
@@ -404,27 +407,24 @@ class Calendar extends Page {
 	public function str_replace_first($search, $replace, $subject) {
     return implode($replace, explode($search, $subject, 2));
 	}
-
+	
+	public function convertiCalDurationToSeconds($duration, $start, $identifier, $multiplier) {
+		if (strpos($duration, $identifier) != false) {
+			$time = strok($duration, $identifier);
+			$start += (intval($time) * $multiplier);
+			return $this->str_replace_first((string)$time . $identifier, '', $duration);
+		}
+	}
+	
 	public function iCalDurationToEndTime($startTime, $duration) {
 		$durint = 0;
 		$duration = str_replace('P', '', $duration);//remove P
 		$duration = str_replace('T', '', $duration);//remove T
-		if (strpos($duration, 'H') != false) {
-			$hours = strtok($duration, 'H');
-			$durint += (intval($hours) * 3600);
-			$duration = $this->str_replace_first((string)$hours . 'H', '', $duration);
-		}
-		if (strpos($duration, 'M') != false) {
-			$minutes = strtok($duration, 'M');
-			$durint += (intval($minutes) * 60);
-			$duration = $this->str_replace_first((string)$minutes . 'M', '', $duration);
-		}
-		if (strpos($duration, 'S') != false) {
-			$seconds = strtok($duration, 'S');
-			$durint += (intval($seconds));
-			$duration = $this->str_replace_first((string)$seconds . 'S', '', $duration);
-		}
-
+	
+		$duration = $this->convertiCalDurationToSeconds($duration, $durint, 'H', 3600);
+		$duration = $this->convertiCalDurationToSeconds($duration, $durint, 'M', 60);
+		$duration = $this->convertiCalDurationToSeconds($duration, $durint, 'S', 1);
+	
 		$startTime = str_replace('T', '', $startTime);//remove T
 		$startTime = str_replace('Z', '', $startTime);//remove Z
 		$endTime = strtotime($startTime) + $durint;

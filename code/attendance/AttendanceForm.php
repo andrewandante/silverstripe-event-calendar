@@ -39,12 +39,17 @@ class AttendanceForm extends Form {
    * @return \SS_HTTPResponse
    */
   public function doRegister($data, $form) {
-    $r = new Attendance();
+    $att = Attendance::get()->filter(array(
+      'MemberID' => $data['MemberID'],
+      'MatchID' => $data['MatchID']
+    ));
+    if ($att->exists()) {
+      $r = $att->sort('LastEdited', 'DESC')->First();
+    } else {
+      $r = new Attendance();
+    }
     $form->saveInto($r);
-    $r->Member = Member::currentUser();
-    // var_dump($r->Member); die();
     $r->write();
-    // var_dump($r); die();
     // $from = Email::getAdminEmail();
     // $to = $r->Email;
     // $bcc = $EventDetails->RSVPEmail;
